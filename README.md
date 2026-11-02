@@ -13,3 +13,7 @@ Drop space objects into a containment field and merge matching pairs, growing st
 | `npm run check` | Headless play test + art render (run before pushing) |
 
 Plays with a controller, keyboard, mouse or touch. Agents: rules are in [`AGENTS.md`](AGENTS.md); the design brief is [`DESIGN.md`](DESIGN.md).
+
+## Rights
+
+© Visual Zone Development. All rights reserved. The source is public so PushPlay can build and verify the game; that doesn't make it open source, and it may not be copied, modified or redistributed without permission. Third-party assets (fonts and similar) keep their own licences, listed in the game's credits files.
