@@ -1,0 +1,135 @@
+# Publishes this game to its PUBLIC release repo, where PushPlay's Discover tab and the launcher
+# pick it up. The code stays here, in the private repo; only the built game (web zip, cover,
+# hero, screenshot, index) reaches the public repo.
+#
+# Run it from the Actions tab: "Release to PushPlay" → Run workflow. Nothing is published on push.
+#
+# One-time setup (already done for this repo):
+#   - secret RELEASE_TOKEN: a fine-grained token with "Contents: read and write" on the release repo
+#   - optional variable RELEASE_REPO to publish somewhere other than the default below
+#
+# Not part of the PushPlay build kit, so `npm run update-kit` leaves it alone. It runs the kit's
+# own build and publish stages, pointed at the release repo.
+name: Release to PushPlay
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pushplay-release
+  cancel-in-progress: false
+
+env:
+  RELEASE_REPO: ${{ vars.RELEASE_REPO || 'Visual-Zone-Development/singularity' }}
+
+jobs:
+  # Same as the kit's build job, always building the whole game. Runs game code with no token in reach.
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: 22
+
+      - name: Install game dependencies
+        run: |
+          if [ -f package.json ]; then
+            if [ ! -f package-lock.json ]; then
+              echo "::error::package-lock.json is missing. Run npm install locally and commit the lockfile."
+              exit 1
+            fi
+            npm ci --no-audit --no-fund
+          fi
+
+      - name: Install build kit
+        run: npm ci --prefix .github/pushplay --no-audit --no-fund
+
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-1.64.1
+
+      - name: Install headless browser
+        run: node .github/pushplay/node_modules/playwright/cli.js install --with-deps chromium
+
+      - name: Build and check
+        run: node .github/pushplay/ci.mjs
+        env:
+          STAGE: build
+          BUILD_ALL: 'true'
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: game-builds
+          path: .github/pushplay/.work/dist
+          retention-days: 3
+
+  # Only runs when the build and check passed: a broken build never reaches players.
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check the release token
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::error::The RELEASE_TOKEN secret is missing. Add a token with Contents: read and write on $RELEASE_REPO."
+            exit 1
+          fi
+          gh api "repos/$RELEASE_REPO" --jq .full_name >/dev/null || { echo "::error::RELEASE_TOKEN can't reach $RELEASE_REPO."; exit 1; }
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: 22
+
+      - name: Install build kit
+        run: npm ci --prefix .github/pushplay --no-audit --no-fund
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          name: game-builds
+          path: .github/pushplay/.work/dist
+
+      # The release repo's own first commit, so "pushplay-latest" never points at this repo's code.
+      - name: Point the release at the release repo
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        run: |
+          sha=$(gh api "repos/$RELEASE_REPO/commits?per_page=1" --jq '.[0].sha')
+          node -e '
+            const fs = require("fs"), f = ".github/pushplay/.work/dist/build-results.json"
+            const r = JSON.parse(fs.readFileSync(f, "utf8")); r.sha = process.argv[1]
+            fs.writeFileSync(f, JSON.stringify(r))' "$sha"
+
+      # gh follows GH_REPO; the kit records GITHUB_REPOSITORY in the index, so both name the release repo.
+      - name: Publish to the release repo
+        env:
+          STAGE: publish
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+          GH_REPO: ${{ env.RELEASE_REPO }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: GITHUB_REPOSITORY="$RELEASE_REPO" node .github/pushplay/ci.mjs
+
+      - name: Summary
+        run: |
+          v=$(node -p "require('./pushplay.json').version")
+          echo "Published $(node -p "require('./pushplay.json').name") $v to https://github.com/$RELEASE_REPO/releases/tag/pushplay-latest" >> "$GITHUB_STEP_SUMMARY"
