@@ -1,0 +1,18 @@
+{
+  "name": "singularity",
+  "private": true,
+  "type": "module",
+  "description": "Drop space objects into a containment field and merge matching pairs, growing stardust into moons, planets, stars and finally a black hole. Play pure Classic, race the clock in Countdown where merges buy time, or take on Anomaly's Transmissions and Cosmic Events. Controller, keyboard, mouse or touch.",
+  "scripts": {
+    "setup": "npm install && node .github/pushplay/node_modules/playwright/cli.js install chromium",
+    "postinstall": "npm ci --prefix .github/pushplay --no-audit --no-fund || npm install --prefix .github/pushplay --no-audit --no-fund",
+    "dev": "node .github/pushplay/dev.mjs",
+    "check": "node .github/pushplay/check.mjs"
+  },
+  "devDependencies": {
+    "vite": "^7.3.7"
+  },
+  "engines": {
+    "node": ">=20.19"
+  }
+}

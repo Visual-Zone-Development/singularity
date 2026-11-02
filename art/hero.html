@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Singularity hero</title>
+    <style>
+      html, body { margin: 0; width: 1920px; height: 450px; overflow: hidden; background: #191241; }
+    </style>
+  </head>
+  <body>
+    <canvas id="c" width="1920" height="450"></canvas>
+    <script type="module">
+      import { drawKind, rgba, rng, TAU } from '../art.js'
+      const c = document.getElementById('c').getContext('2d')
+      const W = 1920, H = 450
+      c.fillStyle = '#191241'
+      c.fillRect(0, 0, W, H)
+      const neb = (x, y, r, col, a) => {
+        const g = c.createRadialGradient(x, y, 0, x, y, r)
+        g.addColorStop(0, rgba(col, a))
+        g.addColorStop(1, rgba(col, 0))
+        c.fillStyle = g
+        c.fillRect(0, 0, W, H)
+      }
+      neb(1480, 225, 620, '#7a35d0', 0.55)
+      neb(1880, 40, 360, '#c03a8a', 0.25)
+      neb(200, 450, 520, '#16708f', 0.3)
+      const q = rng(11)
+      for (let i = 0; i < 260; i++) {
+        const s = q()
+        c.fillStyle = `rgba(235,230,255,${0.25 + s * 0.6})`
+        c.beginPath()
+        c.arc(q() * W, q() * H, 0.6 + s * s * 2, 0, TAU)
+        c.fill()
+      }
+      c.save()
+      c.strokeStyle = 'rgba(185,174,232,.25)'
+      c.lineWidth = 3
+      c.setLineDash([4, 12])
+      c.beginPath()
+      c.ellipse(1480, 230, 420, 150, -0.08, 0, TAU)
+      c.stroke()
+      c.restore()
+      drawKind(c, 0, 1010, 120, 16, 0)
+      drawKind(c, 6, 1120, 170, 74, -0.12)
+      drawKind(c, 2, 1290, 380, 30, 0.2)
+      drawKind(c, 11, 1480, 228, 196, 0)
+      drawKind(c, 8, 1790, 96, 62, 0.1)
+      drawKind(c, 4, 1830, 330, 54, -0.15)
+      drawKind(c, 3, 1700, 410, 28, 0.1)
+      drawKind(c, 1, 960, 330, 20, 0.4)
+    </script>
+  </body>
+</html>

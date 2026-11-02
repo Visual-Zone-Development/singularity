@@ -1,0 +1,28 @@
+{
+  "$schema": "./.github/pushplay/manifest.schema.json",
+  "id": "singularity",
+  "name": "Singularity",
+  "description": "Drop space objects into a containment field and merge matching pairs, growing stardust into moons, planets, stars and finally a black hole. Play pure Classic, race the clock in Countdown where merges buy time, or take on Anomaly's Transmissions and Cosmic Events. Controller, keyboard, mouse or touch.",
+  "version": "1.11.0",
+  "entry": {
+    "web": "index.html"
+  },
+  "art": {
+    "cover": "art/cover.html",
+    "hero": "art/hero.html"
+  },
+  "controls": "gamepad",
+  "inputs": [
+    "gamepad",
+    "keyboard",
+    "mouse",
+    "touch"
+  ],
+  "players": "1",
+  "tags": [
+    "puzzle",
+    "space",
+    "score attack",
+    "cozy"
+  ]
+}

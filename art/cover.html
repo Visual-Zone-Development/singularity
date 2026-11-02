@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Singularity cover</title>
+    <style>
+      @font-face { font-family: 'Lilita One'; src: url('../fonts/lilita-one.woff2') format('woff2'); }
+      html, body { margin: 0; width: 720px; height: 500px; overflow: hidden; background: #191241; }
+      canvas { position: absolute; inset: 0; }
+      h1 {
+        position: absolute; left: 0; right: 0; top: 40px; margin: 0; text-align: center;
+        font: 108px/1 'Lilita One', sans-serif; letter-spacing: 1px;
+        background: linear-gradient(#ffe3a3, #ffb347 60%, #ff6a8a); -webkit-background-clip: text; background-clip: text; color: transparent;
+        -webkit-text-stroke: 0; filter: drop-shadow(0 0 0 #140b30);
+      }
+      h1.outline { background: none; color: #140b30; -webkit-text-stroke: 22px #140b30; }
+    </style>
+  </head>
+  <body>
+    <canvas id="c" width="1440" height="1000" style="width:720px;height:500px"></canvas>
+    <h1 class="outline">SINGULARITY</h1>
+    <h1>SINGULARITY</h1>
+    <script type="module">
+      import { drawKind, rgba, rng, TAU } from '../art.js'
+      const c = document.getElementById('c').getContext('2d')
+      c.scale(2, 2)
+      const W = 720, H = 500
+      c.fillStyle = '#191241'
+      c.fillRect(0, 0, W, H)
+      const neb = (x, y, r, col, a) => {
+        const g = c.createRadialGradient(x, y, 0, x, y, r)
+        g.addColorStop(0, rgba(col, a))
+        g.addColorStop(1, rgba(col, 0))
+        c.fillStyle = g
+        c.fillRect(0, 0, W, H)
+      }
+      neb(380, 290, 300, '#7a35d0', 0.55)
+      neb(60, 470, 300, '#16708f', 0.4)
+      neb(700, 60, 260, '#c03a8a', 0.25)
+      const q = rng(4)
+      for (let i = 0; i < 110; i++) {
+        const s = q()
+        c.fillStyle = `rgba(235,230,255,${0.3 + s * 0.6})`
+        c.beginPath()
+        c.arc(q() * W, q() * H, 0.6 + s * s * 1.8, 0, TAU)
+        c.fill()
+      }
+      // orbit trails
+      c.save()
+      c.strokeStyle = 'rgba(185,174,232,.25)'
+      c.lineWidth = 2
+      c.setLineDash([3, 9])
+      c.beginPath()
+      c.ellipse(372, 290, 270, 96, -0.08, 0, TAU)
+      c.stroke()
+      c.restore()
+      drawKind(c, 6, 108, 300, 56, -0.1)
+      drawKind(c, 0, 196, 206, 16, 0)
+      drawKind(c, 2, 582, 196, 26, 0.2)
+      drawKind(c, 11, 372, 286, 112, 0)
+      drawKind(c, 4, 622, 318, 46, -0.15)
+      drawKind(c, 3, 236, 372, 24, 0.1)
+    </script>
+  </body>
+</html>
