@@ -3,7 +3,7 @@
   "id": "singularity",
   "name": "Singularity",
   "description": "Drop space objects into a containment field and merge matching pairs, growing stardust into moons, planets, stars and finally a black hole. Play pure Classic, race the clock in Countdown where merges buy time, or take on Anomaly's Transmissions and Cosmic Events. Controller, keyboard, mouse or touch.",
-  "version": "1.11.0",
+  "version": "1.11.1",
   "entry": {
     "web": "index.html"
   },

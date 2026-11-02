@@ -64,6 +64,7 @@ const fill = (text) =>
     .replaceAll('{{NAME}}', title)
     .replaceAll('{{ID}}', id)
     .replaceAll('{{SLUG}}', brand.slug)
+    .replaceAll('{{BRAND}}', brand.name)
     .replaceAll('{{MIN_PLAYERS}}', String(minPlayers))
     .replaceAll('{{MAX_PLAYERS}}', String(maxPlayers))
 
