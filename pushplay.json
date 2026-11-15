@@ -1,5 +1,5 @@
 {
-  "$schema": "./.github/pushplay/manifest.schema.json",
+  "$schema": "https://raw.githubusercontent.com/Visual-Zone-Development/pushplay-kit/v1/schema/manifest.schema.json",
   "id": "singularity",
   "name": "Singularity",
   "description": "Drop space objects into a containment field and merge matching pairs, growing stardust into moons, planets, stars and finally a black hole. Play pure Classic, race the clock in Countdown where merges buy time, or take on Anomaly's Transmissions and Cosmic Events. Controller, keyboard, mouse or touch.",
