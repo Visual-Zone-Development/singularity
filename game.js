@@ -21,6 +21,18 @@ const ctx = fit.ctx
 input.attach(canvas, W, H)
 // R is Gravity Pulse right on the keyboard too (E is the default for rb).
 input.extendKeys({ KeyR: 'rb' })
+// A touch screen with no controller (a tablet, PushPlay mobile) starts in touch mode, so the first
+// prompts already say Tap and Drag; input.js would otherwise show keyboard keys until the first touch.
+// The launcher's own choice (inputMode, gaming mode) and ?input=pad still win.
+{
+  let padConnected = false
+  try {
+    padConnected = [...(navigator.getGamepads?.() ?? [])].some((pad) => pad?.connected)
+  } catch {
+    /* gamepads blocked */
+  }
+  if (input.mode === 'keyboard' && !globalThis.pushplay?.inputMode && !padConnected && matchMedia('(pointer: coarse)').matches) input.mode = 'touch'
+}
 // Device pixels per game unit, for the pre-rendered background.
 let pixelScale = fit.scale * fit.dpr
 fit.onResize(() => {
@@ -2348,7 +2360,7 @@ function drawPaused() {
   ctx.fillRect(0, 0, W, H)
   outlined('PAUSED', W / 2, 200, 72, C.ink)
   drawMenu(pauseMenu)
-  prompts([['a', 'Select'], ['b', 'Resume']], W / 2, 680, 'center')
+  prompts(input.mode === 'touch' ? [['tap', 'Select']] : [['a', 'Select'], ['b', 'Resume']], W / 2, 680, 'center')
 }
 
 function drawSettings() {
@@ -2357,7 +2369,7 @@ function drawSettings() {
   ctx.fillStyle = 'rgba(12,8,30,.86)'
   ctx.fillRect(0, 0, W, H)
   settingsScreen.draw(ctx, { font: `700 ${Math.round(26 * TS())}px ${UI}`, titleFont: `52px ${DISP}`, color: C.acc })
-  prompts([['left', 'Change'], ['b', 'Back']], W / 2, 756, 'center')
+  prompts(input.mode === 'touch' ? [['tap', 'Left or right side to change']] : [['left', 'Change'], ['b', 'Back']], W / 2, 756, 'center')
 }
 
 function drawOver(g) {
@@ -2529,6 +2541,20 @@ function drawDebug() {
   ctx.restore()
 }
 
+// ---------- portrait ----------
+// Touch in portrait shrinks the 1280×800 field to about 64% (820 px wide on a tablet), so the pause and
+// Pulse buttons fall to ~36 px, under the 44 px a finger needs. Ask for landscape instead: a full-screen
+// note (index.html #rotate) covers the game, play pauses and input is ignored until the screen turns.
+const rotateNote = document.getElementById('rotate')
+let sideways = false
+function checkSideways() {
+  const now = input.mode === 'touch' && innerHeight > innerWidth
+  if (now === sideways) return
+  sideways = now
+  if (rotateNote) rotateNote.hidden = !now
+  if (now && state.screen === 'playing') pause()
+}
+
 // ---------- loop ----------
 // The check and the debug overlay read state.screen with the standard names; the guide and the
 // leaderboards are title sub-screens.
@@ -2539,8 +2565,31 @@ window.__game = {
   settings,
   get titleMenu() {
     return titleMenu
+  },
+  /** The raw screen, including the title sub-screens guide and boards. */
+  get screen() {
+    return state.screen
+  },
+  get inputMode() {
+    return input.mode
+  },
+  get sideways() {
+    return sideways
+  },
+  menus: { title: titleMenu, pause: pauseMenu, over: overMenu, back: backMenu, settings: settingsScreen.menu },
+  // On-screen touch targets in game space (1280×800), for the touch test.
+  rects: {
+    pause: PAUSE_BUTTON,
+    hold: HOLD_BOX,
+    pulse: PULSE_BUTTONS,
+    save: SAVE_BUTTON,
+    initials: [0, 1, 2].map(initialRect),
+    boardTabs: BOARD_MODES.map((_, i) => tabRect(BOARD_MODES, 240, i)),
+    guideTabs: GUIDE_TABS.map((_, i) => tabRect(GUIDE_TABS, 210, i))
   }
 }
+// ?debug: end the current run on demand (the touch test uses it to reach the initials entry).
+if (debug) window.__game.debug = { endRun: () => state.screen === 'playing' && gameOver(state.game) }
 document.fonts?.load(`400 32px ${DISP}`).catch(() => {})
 document.fonts?.load(`700 24px ${UI}`).catch(() => {})
 
@@ -2551,7 +2600,8 @@ function frame(now) {
   last = now
   fps += (1 / Math.max(dt, 1e-3) - fps) * 0.05
   input.update(dt)
-  update(dt)
+  checkSideways()
+  if (!sideways) update(dt)
   draw()
   if (debug) drawDebug()
   requestAnimationFrame(frame)
