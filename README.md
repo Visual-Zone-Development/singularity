@@ -11,6 +11,7 @@ Drop space objects into a containment field and merge matching pairs, growing st
 |---|---|
 | `npm run dev` | Play locally with live reload |
 | `npm run check` | Headless play test + art render (run before pushing) |
+| `node --test tests/*.test.mjs` | Touch-only play test on an emulated tablet (needs Playwright with Chromium) |
 
 Plays with a controller, keyboard, mouse or touch. Agents: rules are in [`AGENTS.md`](AGENTS.md); the design brief is [`DESIGN.md`](DESIGN.md).
 

@@ -2,7 +2,7 @@
 
 > Drop space objects into a containment field and merge matching pairs, growing stardust into moons, planets, stars and finally a black hole, without letting the pile cross the Horizon.
 
-*Status: shipped · Version: 1.11.0*
+*Status: shipped · Version: 1.12.0*
 
 This brief was reverse-engineered from the shipped code (`game.js`, `art.js`, `audio.js`, `input.js`). It describes what the game does today.
 
@@ -40,7 +40,8 @@ See [framework.md](../../docs/game-design/framework.md). Each target maps to a m
 | Y | Unused |
 | LB / RB | Gravity Pulse left / right (Anomaly only); switch Field Guide and Leaderboard tabs |
 | Start (`menu`) | Pause: Resume, Restart, Settings, Field guide, Quit to title. Also Esc, P and the on-screen ≡ button; auto-pauses when the launcher overlay opens, the window loses focus or every controller disconnects |
-| Mouse / touch | Drag inside the field to steer the dropper and release to drop (a hovering mouse steers too); tap the HOLD box to hold, the Pulse buttons to pulse, the top-right button to pause; every menu by click or tap; initials by tapping a slot (top/bottom half changes the letter) and Save |
+| Mouse / touch | Drag inside the field to steer the dropper and release to drop (a hovering mouse steers too); tap the HOLD box to hold, the Pulse buttons to pulse, the top-right button to pause; every menu by click or tap; Settings values by tapping the left or right half of the row; Field Guide and Leaderboard tabs by tap; initials by tapping a slot (top/bottom half changes the letter) and Save |
+| Touch screen (tablet) | Starts in touch mode when the screen's main pointer is coarse and no controller is connected, so prompts say Tap / Drag from the first frame (the launcher's own input mode still wins). The page blocks scrolling, pinch zoom, text selection, the long-press callout and the tap flash. Held upright, a full-screen "Turn your tablet sideways" note covers the game and pauses play: portrait shrinks the field to 64% and the pause and Pulse buttons to ~36 px, under the 44 px a finger needs |
 
 Keyboard: arrows/WASD move, Space/Enter = A, Backspace = B, Shift = X, Q/E (or R) = LB/RB, Esc/P = pause. Button names in the HUD come from `input.label` / `drawPrompts`, so they follow the device in use.
 
@@ -101,7 +102,8 @@ Tailored from [complete-game.md](../../docs/game-design/complete-game.md):
 - [x] Text at least 24px in the 1280x800 space
 - [~] `TUNING` object: Anomaly numbers (wormholes, ice, Transmissions, Cosmic Events) are in `TUNING`; physics constants are still separate
 - [x] Delta-time movement, clamped to 1/20 s, with a fixed 120 Hz physics step
-- [x] `window.__game = { state, TUNING, save, settings, titleMenu }` with `state.screen` in `title | playing | paused | settings | gameover`; `?debug` overlay with screen, input mode, fps, scale and body counts
+- [x] `window.__game = { state, TUNING, save, settings, titleMenu, screen, inputMode, sideways, menus, rects }` with `state.screen` in `title | playing | paused | settings | gameover` (`screen` is the raw one, including `guide` and `boards`; `menus` and `rects` are the tap targets in 1280×800 space); `?debug` overlay with screen, input mode, fps, scale and body counts, plus `__game.debug.endRun()` to end the current run
+- [x] Touch-only play test: `node --test tests/*.test.mjs` (Playwright + Chromium) plays every mode, menu, HOLD, Pulse, pause, Settings, initials and Leaderboards on an emulated 1180×820 tablet by tap and drag only, and checks portrait
 - [x] Particles capped (360), background pre-rendered to an offscreen canvas
 - [ ] `npm run check` pass and screenshots not verified in this pass
 
@@ -129,3 +131,4 @@ Tailored from [complete-game.md](../../docs/game-design/complete-game.md):
 - 1.11.0: Kit v2. Every menu (title, pause, game over, Field Guide and Leaderboard tabs, initials entry) works with a controller, keyboard, mouse and touch through `menu.js`; mouse and touch play (drag to steer, release to drop, tap HOLD / Pulse / pause); pause is Start / Esc / P / the on-screen button with Resume, Restart, Settings, Field guide, Quit to title, and auto-pauses from the launcher; Settings screen (volumes, reduced shake and flash, text size); saves move to `singularity-save-v1`; `fit.js` letterboxing with crisp text at DPR 2; prompts follow the device in use. Gameplay unchanged.
 - 1.10.1: Countdown vents escalate: −10 s for the first, +5 s more for each one after (never resets), and every vent breaks the chain. The HUD shows the vent count and the cost of the next one under the chain.
 - 1.11.1: Build kit v6. Inside the launcher the pause menu ends with **Quit to library** (added by `menu.js`), so players can always find their way back to their games.
+- 1.12.0: Tablets. A touch screen with no controller starts in touch mode, so prompts say Tap / Drag before the first touch; the page no longer scrolls, zooms, selects text or shows the long-press callout; held upright, a "Turn your tablet sideways" note covers the game and pauses play. The pause and Settings prompts on touch no longer show a Back button that touch doesn't have. New touch-only play test in `tests/`. Gameplay unchanged.
