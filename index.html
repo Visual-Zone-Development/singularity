@@ -8,11 +8,23 @@
       @font-face { font-family: 'Lilita One'; src: url('./fonts/lilita-one.woff2') format('woff2'); font-weight: 400; }
       @font-face { font-family: 'Rubik'; src: url('./fonts/rubik-700.woff2') format('woff2'); font-weight: 700; }
       html, body { margin: 0; height: 100%; background: #0e0a24; overflow: hidden; overscroll-behavior: none; }
+      /* Touch screens: no scrolling, pinch zoom, text selection, long-press callout or grey tap flash. */
+      html, body { touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
       canvas { display: block; position: absolute; }
+      /* Shown by game.js on a touch screen held upright: the field is too small to play in portrait. */
+      #rotate { position: fixed; inset: 0; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 24px; box-sizing: border-box; background: #191241; color: #fff8ec; text-align: center; font: 400 52px 'Lilita One', 'Rubik', system-ui, sans-serif; }
+      #rotate[hidden] { display: none; }
+      #rotate svg { width: 120px; height: 120px; }
+      #rotate p { margin: 0; font: 700 28px 'Rubik', system-ui, sans-serif; color: #b9aee8; }
     </style>
   </head>
   <body>
     <canvas id="game"></canvas>
+    <div id="rotate" hidden>
+      <svg viewBox="0 0 120 120" aria-hidden="true"><rect x="38" y="14" width="44" height="72" rx="8" fill="none" stroke="#b9aee8" stroke-width="5" opacity=".5" /><rect x="24" y="52" width="72" height="44" rx="8" fill="none" stroke="#ffb347" stroke-width="6" /><path d="M92 30 a26 26 0 0 1 4 26" fill="none" stroke="#ffb347" stroke-width="5" stroke-linecap="round" /><path d="M88 52 l8 6 l4 -9" fill="none" stroke="#ffb347" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+      <div>Turn your tablet sideways</div>
+      <p>Singularity plays in landscape.</p>
+    </div>
     <script type="module" src="./game.js"></script>
   </body>
 </html>
