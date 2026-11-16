@@ -1406,6 +1406,8 @@ const promptInput = {
   label(b) {
     if (b === 'move') return pointerMode() ? 'Drag' : input.stickLabel()
     if (b === 'tap') return input.mode === 'touch' ? 'Tap' : 'Click'
+    // The on-screen pause button draws two bars, not the kit's ≡ glyph.
+    if (b === 'menu' && input.mode === 'touch') return '‖'
     return input.label(b)
   }
 }
